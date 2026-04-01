@@ -66,5 +66,12 @@ app.UseCors("PermitirTudo");
 // qual Controller e qual método deve ser chamado.
 app.MapControllers();
 
+// Applica as migrations do Entity Framework Core automaticamente na inicialização
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
+}
+
 // Inicia a aplicação e fica escutando requisições HTTP.
 app.Run();
