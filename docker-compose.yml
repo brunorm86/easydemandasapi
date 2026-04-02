@@ -11,14 +11,14 @@ services:
     depends_on:
       - db
 
-  #webfront:
-   # build:
-    #  context: ../easydemandasfront
-    #  dockerfile: Dockerfile
-   # ports:
-    #  - "3000:80" # Maps local port 3000 to Nginx port 80
-    #depends_on:
-     # - webapi
+  webfront:
+    build:
+      context: ../easydemandasfront
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80" # Maps local port 3000 to Nginx port 80
+    depends_on:
+      - webapi
 
   db:
     image: postgres:15-alpine
