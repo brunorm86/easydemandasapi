@@ -35,11 +35,20 @@ public class Pessoa
     // Telefone da pessoa — campo opcional.
     // No banco: coluna "Telefone" TEXT NULL
     public required string Telefone { get; set; }
+   
+    // Endereço da pessoa — campo opcional.
+    // No banco: coluna "Endereco" TEXT NULL
+    public required string Endereco { get; set; }
 
-    // Data de nascimento da pessoa.
+    // CPF da pessoa — campo opcional.
+    // No banco: coluna "CPF" TEXT NULL
+    public required string Cpf { get; set; }
+
+ // Data de nascimento da pessoa.
     // Apenas dia, mês e ano.
     // No banco: coluna "DataNascimento" DATE
     public required DateOnly DataNascimento { get; set; }
 
+    
     public required int NumDependentes { get; set; }
 }

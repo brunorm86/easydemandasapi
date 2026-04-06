@@ -155,6 +155,8 @@ public class PessoasController : ControllerBase
         pessoaExistente.Sobrenome = pessoa.Sobrenome;
         pessoaExistente.Email = pessoa.Email;
         pessoaExistente.Telefone = pessoa.Telefone;
+        pessoaExistente.Endereco = pessoa.Endereco;
+        pessoaExistente.Cpf = pessoa.Cpf;
         pessoaExistente.DataNascimento = pessoa.DataNascimento;
         pessoaExistente.NumDependentes = pessoa.NumDependentes;
 
