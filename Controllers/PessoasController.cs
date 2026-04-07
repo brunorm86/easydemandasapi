@@ -158,11 +158,11 @@ public class PessoasController : ControllerBase
         pessoaExistente.Endereco = pessoa.Endereco;
         pessoaExistente.Cpf = pessoa.Cpf;
         pessoaExistente.DataNascimento = pessoa.DataNascimento;
-        pessoaExistente.NumDependentes = pessoa.NumDependentes;
 
         // SaveChangesAsync executa o UPDATE no banco:
         // UPDATE "Pessoas"
-        // SET "Nome" = @nome, "Sobrenome" = @sobrenome, "Email" = @email, "Telefone" = @telefone, "DataNascimento" = @datanascimento, "NumDependentes" = @numdependentes
+        // SET "Nome" = @nome, "Sobrenome" = @sobrenome, "Email" = @email, "Telefone" = @telefone, "DataNascimento" = @datanascimento, 
+        // "Endereco" = @endereco, "Cpf" = @cpf
         // WHERE "Id" = @id
         await _context.SaveChangesAsync();
 

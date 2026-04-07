@@ -48,7 +48,4 @@ public class Pessoa
     // Apenas dia, mês e ano.
     // No banco: coluna "DataNascimento" DATE
     public required DateOnly DataNascimento { get; set; }
-
-    
-    public required int NumDependentes { get; set; }
 }
