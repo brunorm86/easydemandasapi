@@ -35,4 +35,6 @@ public class AppDbContext : DbContext
     //
     // O nome da propriedade ("Pessoas") define o nome da tabela no banco.
     public DbSet<Pessoa> Pessoas { get; set; }
+    public DbSet<Empregado> Empregados { get; set; }
+    public DbSet<Departamento> Departamentos { get; set; }
 }
