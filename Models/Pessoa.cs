@@ -1,4 +1,5 @@
 // Models/Pessoa.cs
+using System.Text.Json.Serialization;
 
 namespace easydemandasapi.Models;
 
@@ -44,8 +45,5 @@ public class Pessoa
     // No banco: coluna "CPF" TEXT NULL
     public required string Cpf { get; set; }
 
- // Data de nascimento da pessoa.
-    // Apenas dia, mês e ano.
-    // No banco: coluna "DataNascimento" DATE
     public required DateOnly DataNascimento { get; set; }
 }

@@ -19,7 +19,12 @@ public class EmpregadosController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Empregado>>> GetEmpregados()
     {
-        var empregados = await _context.Empregados.ToListAsync();
+        var empregados = await _context.Empregados
+            .Include(e => e.Pessoa)
+            .Include(e => e.Dependentes)
+            .Include(e => e.Cargo)
+            .Include(e => e.Departamento)
+            .ToListAsync();
         return Ok(empregados);
     }
 
@@ -60,15 +65,10 @@ public class EmpregadosController : ControllerBase
             return NotFound(new { mensagem = $"Empregado com ID {id} não encontrado." });
         }
 
-        empregadoExistente.Nome = empregado.Nome;
-        empregadoExistente.Sobrenome = empregado.Sobrenome;
-        empregadoExistente.Email = empregado.Email;
-        empregadoExistente.Telefone = empregado.Telefone;
-        empregadoExistente.Endereco = empregado.Endereco;
-        empregadoExistente.Cpf = empregado.Cpf;
-        empregadoExistente.DataNascimento = empregado.DataNascimento;
-        empregadoExistente.Cargo = empregado.Cargo;
+        empregadoExistente.PessoaId = empregado.PessoaId;
+        empregadoExistente.CargoId = empregado.CargoId;
         empregadoExistente.DataContratacao = empregado.DataContratacao;
+        empregadoExistente.DepartamentoId = empregado.DepartamentoId;
 
         await _context.SaveChangesAsync();
 
