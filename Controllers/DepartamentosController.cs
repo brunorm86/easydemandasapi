@@ -20,7 +20,8 @@ public class DepartamentosController : ControllerBase
     public async Task<ActionResult<IEnumerable<Departamento>>> GetDepartamentos()
     {
         var departamentos = await _context.Departamentos
-            .Include(d => d.Responsavel) // Opcional: incluir os dados do responsável na consulta
+            .Include(d => d.Responsavel)
+                .ThenInclude(r => r.Pessoa) // Include Pessoa to get the name
             .ToListAsync();
 
         return Ok(departamentos);
@@ -31,6 +32,7 @@ public class DepartamentosController : ControllerBase
     {
         var departamento = await _context.Departamentos
             .Include(d => d.Responsavel)
+                .ThenInclude(r => r.Pessoa)
             .FirstOrDefaultAsync(d => d.Id == id);
 
         if (departamento == null)

@@ -75,5 +75,41 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(e => e.PessoaId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // --- Seed de Dados Iniciais ---
+        modelBuilder.Entity<Pessoa>().HasData(new Pessoa
+        {
+            Id = 9999,
+            Nome = "PESSOA",
+            Sobrenome = "INDETERMINADA",
+            Email = "indeterminado@easydemandas.com",
+            Telefone = "00000000000",
+            Endereco = "Indeterminado",
+            Cpf = "00000000000",
+            DataNascimento = new DateOnly(1900, 1, 1)
+        });
+
+        modelBuilder.Entity<Cargo>().HasData(new Cargo
+        {
+            Id = 9999,
+            Nome = "CARGO INDETERMINADO"
+        });
+
+        modelBuilder.Entity<Empregado>().HasData(new Empregado
+        {
+            Id = 9999,
+            PessoaId = 9999,
+            CargoId = 9999,
+            DataContratacao = new DateOnly(1900, 1, 1),
+            DepartamentoId = null
+        });
+
+        modelBuilder.Entity<Departamento>().HasData(new Departamento
+        {
+            Id = 9999,
+            Nome = "DEPARTAMENTO INDETERMINADO",
+            Sigla = "IND",
+            ResponsavelId = 9999
+        });
     }
 }
