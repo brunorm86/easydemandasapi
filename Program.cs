@@ -1,5 +1,6 @@
 // Program.cs
 
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
 
@@ -11,7 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Registra os Controllers no sistema de Injeção de Dependência.
 // Sem isso, o .NET não sabe que existem Controllers na aplicação.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 // Registra o AppDbContext no sistema de Injeção de Dependência.
 // Isso permite que os Controllers recebam o AppDbContext automaticamente

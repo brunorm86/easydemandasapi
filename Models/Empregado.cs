@@ -27,6 +27,5 @@ public class Empregado
     // Chave Estrangeira para o Departamento em que o Empregado trabalha
     public int? DepartamentoId { get; set; }
     
-    [JsonIgnore]
     public Departamento? Departamento { get; set; }
 }
