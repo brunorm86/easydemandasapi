@@ -39,6 +39,8 @@ public class AppDbContext : DbContext
     public DbSet<Departamento> Departamentos { get; set; }
     public DbSet<Dependente> Dependentes { get; set; }
     public DbSet<Cargo> Cargos { get; set; }
+    public DbSet<Chamado> Chamados { get; set; }
+    public DbSet<DetalhesChamado> DetalhesChamados { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -74,6 +76,27 @@ public class AppDbContext : DbContext
             .HasOne(e => e.Pessoa)
             .WithMany()
             .HasForeignKey(e => e.PessoaId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Relação 4: Chamado é solicitado por um Empregado
+        modelBuilder.Entity<Chamado>()
+            .HasOne(c => c.Solicitante)
+            .WithMany()
+            .HasForeignKey(c => c.SolicitanteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Relação 5: Chamado 1:1 DetalhesChamado
+        modelBuilder.Entity<DetalhesChamado>()
+            .HasOne(d => d.Chamado)
+            .WithOne(c => c.Detalhes)
+            .HasForeignKey<DetalhesChamado>(d => d.ChamadoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Relação 6: DetalhesChamado pertence a um Centro de Custo (Departamento)
+        modelBuilder.Entity<DetalhesChamado>()
+            .HasOne(d => d.Departamento)
+            .WithMany()
+            .HasForeignKey(d => d.DepartamentoId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // --- Seed de Dados Iniciais ---
