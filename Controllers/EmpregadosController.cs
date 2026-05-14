@@ -1,3 +1,5 @@
+// Controllers/EmpregadosController.cs
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
@@ -20,8 +22,6 @@ public class EmpregadosController : ControllerBase
     public async Task<ActionResult<IEnumerable<Empregado>>> GetEmpregados()
     {
         var empregados = await _context.Empregados
-            .Include(e => e.Pessoa)
-            .Include(e => e.Dependentes)
             .Include(e => e.Cargo)
             .Include(e => e.Departamento)
             .ToListAsync();
@@ -31,7 +31,10 @@ public class EmpregadosController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Empregado>> GetEmpregado(int id)
     {
-        var empregado = await _context.Empregados.FindAsync(id);
+        var empregado = await _context.Empregados
+            .Include(e => e.Cargo)
+            .Include(e => e.Departamento)
+            .FirstOrDefaultAsync(e => e.Id == id);
 
         if (empregado == null)
         {
@@ -58,17 +61,23 @@ public class EmpregadosController : ControllerBase
             return BadRequest(new { mensagem = "O ID da URL não corresponde ao ID do empregado no body." });
         }
 
-        var empregadoExistente = await _context.Empregados.FindAsync(id);
+        var existente = await _context.Empregados.FindAsync(id);
 
-        if (empregadoExistente == null)
+        if (existente == null)
         {
             return NotFound(new { mensagem = $"Empregado com ID {id} não encontrado." });
         }
 
-        empregadoExistente.PessoaId = empregado.PessoaId;
-        empregadoExistente.CargoId = empregado.CargoId;
-        empregadoExistente.DataContratacao = empregado.DataContratacao;
-        empregadoExistente.DepartamentoId = empregado.DepartamentoId;
+        existente.Nome = empregado.Nome;
+        existente.Sobrenome = empregado.Sobrenome;
+        existente.Email = empregado.Email;
+        existente.Telefone = empregado.Telefone;
+        existente.Endereco = empregado.Endereco;
+        existente.Cpf = empregado.Cpf;
+        existente.DataNascimento = empregado.DataNascimento;
+        existente.CargoId = empregado.CargoId;
+        existente.DataContratacao = empregado.DataContratacao;
+        existente.DepartamentoId = empregado.DepartamentoId;
 
         await _context.SaveChangesAsync();
 

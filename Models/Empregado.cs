@@ -1,7 +1,6 @@
 // Models/Empregado.cs
 
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace easydemandasapi.Models;
 
@@ -10,22 +9,21 @@ public class Empregado
 {
     public int Id { get; set; }
 
-    // Chave estrangeira para Pessoa
-    public int PessoaId { get; set; }
-    public Pessoa? Pessoa { get; set; }
+    // --- Dados pessoais (antes em Pessoa) ---
+    public required string Nome { get; set; }
+    public required string Sobrenome { get; set; }
+    public required string Email { get; set; }
+    public required string Telefone { get; set; }
+    public required string Endereco { get; set; }
+    public required string Cpf { get; set; }
+    public required DateOnly DataNascimento { get; set; }
 
-    // Chave Estrangeira para Cargo
+    // --- Dados de vínculo empregatício ---
     public int CargoId { get; set; }
     public Cargo? Cargo { get; set; }
 
-    // Data em que o empregado foi contratado
     public required DateOnly DataContratacao { get; set; }
 
-    [JsonIgnore]
-    public ICollection<Dependente> Dependentes { get; set; } = new List<Dependente>();
-
-    // Chave Estrangeira para o Departamento em que o Empregado trabalha
     public int? DepartamentoId { get; set; }
-    
     public Departamento? Departamento { get; set; }
 }

@@ -1,43 +1,16 @@
 // Data/AppDbContext.cs
 
-// Importações necessárias:
-// - Microsoft.EntityFrameworkCore: namespace do EF Core (DbContext, DbSet, etc.)
-// - easydemandasapi.Models: namespace onde estão nossas classes de modelo
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Models;
 
 namespace easydemandasapi.Data;
 
-// AppDbContext herda de DbContext (classe base do EF Core).
-// Herdando de DbContext, nossa classe ganha todos os poderes do EF:
-// consultas, inserções, atualizações, deleções, migrations, etc.
 public class AppDbContext : DbContext
 {
-    // Construtor que recebe as opções de configuração.
-    // Essas opções (qual banco usar, connection string, etc.)
-    // são injetadas pelo sistema de Injeção de Dependência do .NET.
-    // Você não chama esse construtor manualmente — o .NET faz isso.
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-        // Repassa as opções para o construtor da classe pai (DbContext)
-    }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    // DbSet<Pessoa> representa a tabela "Pessoas" no banco de dados.
-    //
-    // O que é um DbSet?
-    // É uma coleção que o EF mapeia diretamente para uma tabela.
-    // Através do DbSet, você pode:
-    //   _context.Pessoas.ToListAsync()         → SELECT * FROM "Pessoas"
-    //   _context.Pessoas.FindAsync(id)         → SELECT * FROM "Pessoas" WHERE Id = @id
-    //   _context.Pessoas.Add(pessoa)          → prepara um INSERT
-    //   _context.Pessoas.Remove(pessoa)       → prepara um DELETE
-    //   _context.SaveChangesAsync()             → executa as operações pendentes no banco
-    //
-    // O nome da propriedade ("Pessoas") define o nome da tabela no banco.
-    public DbSet<Pessoa> Pessoas { get; set; }
     public DbSet<Empregado> Empregados { get; set; }
     public DbSet<Departamento> Departamentos { get; set; }
-    public DbSet<Dependente> Dependentes { get; set; }
     public DbSet<Cargo> Cargos { get; set; }
     public DbSet<Chamado> Chamados { get; set; }
     public DbSet<DetalhesChamado> DetalhesChamados { get; set; }
@@ -46,53 +19,35 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Relacionamento Tabela Associativa: Dependente liga Empregado <-> Pessoa
-        modelBuilder.Entity<Dependente>()
-            .HasOne(d => d.Empregado)
-            .WithMany(e => e.Dependentes)
-            .HasForeignKey(d => d.EmpregadoId);
-
-        // Opcional: Garante que uma mesma pessoa não seja dependente de 2 empregados diferentes (ou do mesmo empregado 2x)
-        modelBuilder.Entity<Dependente>()
-            .HasIndex(d => d.PessoaId)
-            .IsUnique();
-
-        // Relação 1: Empregado trabalha no Departamento
+        // Relação 1: Empregado trabalha em um Departamento
         modelBuilder.Entity<Empregado>()
             .HasOne(e => e.Departamento)
             .WithMany()
             .HasForeignKey(e => e.DepartamentoId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Relação 2: Departamento é gerenciado pelo Empregado
+        // Relação 2: Departamento tem um Empregado como Responsável
         modelBuilder.Entity<Departamento>()
             .HasOne(d => d.Responsavel)
             .WithMany()
             .HasForeignKey(d => d.ResponsavelId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Relação 3: Empregado é uma Pessoa
-        modelBuilder.Entity<Empregado>()
-            .HasOne(e => e.Pessoa)
-            .WithMany()
-            .HasForeignKey(e => e.PessoaId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // Relação 4: Chamado é solicitado por um Empregado
+        // Relação 3: Chamado é solicitado por um Empregado
         modelBuilder.Entity<Chamado>()
             .HasOne(c => c.Solicitante)
             .WithMany()
             .HasForeignKey(c => c.SolicitanteId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Relação 5: Chamado 1:1 DetalhesChamado
+        // Relação 4: Chamado 1:1 DetalhesChamado
         modelBuilder.Entity<DetalhesChamado>()
             .HasOne(d => d.Chamado)
             .WithOne(c => c.Detalhes)
             .HasForeignKey<DetalhesChamado>(d => d.ChamadoId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Relação 6: DetalhesChamado pertence a um Centro de Custo (Departamento)
+        // Relação 5: DetalhesChamado pertence a um Centro de Custo (Departamento)
         modelBuilder.Entity<DetalhesChamado>()
             .HasOne(d => d.Departamento)
             .WithMany()
@@ -100,18 +55,6 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         // --- Seed de Dados Iniciais ---
-        modelBuilder.Entity<Pessoa>().HasData(new Pessoa
-        {
-            Id = 9999,
-            Nome = "PESSOA",
-            Sobrenome = "INDETERMINADA",
-            Email = "indeterminado@easydemandas.com",
-            Telefone = "00000000000",
-            Endereco = "Indeterminado",
-            Cpf = "00000000000",
-            DataNascimento = new DateOnly(1900, 1, 1)
-        });
-
         modelBuilder.Entity<Cargo>().HasData(new Cargo
         {
             Id = 9999,
@@ -121,7 +64,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Empregado>().HasData(new Empregado
         {
             Id = 9999,
-            PessoaId = 9999,
+            Nome = "EMPREGADO",
+            Sobrenome = "INDETERMINADO",
+            Email = "indeterminado@easydemandas.com",
+            Telefone = "00000000000",
+            Endereco = "Indeterminado",
+            Cpf = "00000000000",
+            DataNascimento = new DateOnly(1900, 1, 1),
             CargoId = 9999,
             DataContratacao = new DateOnly(1900, 1, 1),
             DepartamentoId = null

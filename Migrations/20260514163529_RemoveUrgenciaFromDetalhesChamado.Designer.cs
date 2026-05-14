@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using easydemandasapi.Data;
@@ -11,9 +12,11 @@ using easydemandasapi.Data;
 namespace easydemandasapi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260514163529_RemoveUrgenciaFromDetalhesChamado")]
+    partial class RemoveUrgenciaFromDetalhesChamado
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,6 +119,34 @@ namespace easydemandasapi.Migrations
                         });
                 });
 
+            modelBuilder.Entity("easydemandasapi.Models.Dependente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EmpregadoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Parentesco")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PessoaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpregadoId");
+
+                    b.HasIndex("PessoaId")
+                        .IsUnique();
+
+                    b.ToTable("Dependentes");
+                });
+
             modelBuilder.Entity("easydemandasapi.Models.DetalhesChamado", b =>
                 {
                     b.Property<int>("Id")
@@ -164,18 +195,49 @@ namespace easydemandasapi.Migrations
                     b.Property<int>("CargoId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Cpf")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateOnly>("DataContratacao")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly>("DataNascimento")
                         .HasColumnType("date");
 
                     b.Property<int?>("DepartamentoId")
                         .HasColumnType("integer");
+
+                    b.Property<int>("PessoaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CargoId");
+
+                    b.HasIndex("DepartamentoId");
+
+                    b.HasIndex("PessoaId");
+
+                    b.ToTable("Empregados");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 9999,
+                            CargoId = 9999,
+                            DataContratacao = new DateOnly(1900, 1, 1),
+                            PessoaId = 9999
+                        });
+                });
+
+            modelBuilder.Entity("easydemandasapi.Models.Pessoa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Cpf")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("DataNascimento")
+                        .HasColumnType("date");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -199,24 +261,18 @@ namespace easydemandasapi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CargoId");
-
-                    b.HasIndex("DepartamentoId");
-
-                    b.ToTable("Empregados");
+                    b.ToTable("Pessoas");
 
                     b.HasData(
                         new
                         {
                             Id = 9999,
-                            CargoId = 9999,
                             Cpf = "00000000000",
-                            DataContratacao = new DateOnly(1900, 1, 1),
                             DataNascimento = new DateOnly(1900, 1, 1),
                             Email = "indeterminado@easydemandas.com",
                             Endereco = "Indeterminado",
-                            Nome = "EMPREGADO",
-                            Sobrenome = "INDETERMINADO",
+                            Nome = "PESSOA",
+                            Sobrenome = "INDETERMINADA",
                             Telefone = "00000000000"
                         });
                 });
@@ -241,6 +297,25 @@ namespace easydemandasapi.Migrations
                         .IsRequired();
 
                     b.Navigation("Responsavel");
+                });
+
+            modelBuilder.Entity("easydemandasapi.Models.Dependente", b =>
+                {
+                    b.HasOne("easydemandasapi.Models.Empregado", "Empregado")
+                        .WithMany("Dependentes")
+                        .HasForeignKey("EmpregadoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("easydemandasapi.Models.Pessoa", "Pessoa")
+                        .WithMany()
+                        .HasForeignKey("PessoaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empregado");
+
+                    b.Navigation("Pessoa");
                 });
 
             modelBuilder.Entity("easydemandasapi.Models.DetalhesChamado", b =>
@@ -275,14 +350,27 @@ namespace easydemandasapi.Migrations
                         .HasForeignKey("DepartamentoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("easydemandasapi.Models.Pessoa", "Pessoa")
+                        .WithMany()
+                        .HasForeignKey("PessoaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Cargo");
 
                     b.Navigation("Departamento");
+
+                    b.Navigation("Pessoa");
                 });
 
             modelBuilder.Entity("easydemandasapi.Models.Chamado", b =>
                 {
                     b.Navigation("Detalhes");
+                });
+
+            modelBuilder.Entity("easydemandasapi.Models.Empregado", b =>
+                {
+                    b.Navigation("Dependentes");
                 });
 #pragma warning restore 612, 618
         }

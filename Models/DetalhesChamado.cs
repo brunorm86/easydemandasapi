@@ -24,8 +24,6 @@ public class DetalhesChamado
 
     public required string NivelCriticidade { get; set; }
 
-    public required string Urgencia { get; set; }
-
     public string? Observacoes { get; set; }
 
     public string? Encaminhamentos { get; set; }
