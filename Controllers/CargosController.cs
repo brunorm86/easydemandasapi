@@ -81,14 +81,27 @@ public class CargosController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCargo(int id)
     {
+        if (id == 9999) return BadRequest(new { mensagem = "Não é possível excluir o cargo padrão do sistema." });
+
         var cargo = await _context.Cargos.FindAsync(id);
         if (cargo == null)
         {
             return NotFound();
         }
 
+        var empregados = await _context.Empregados.Where(e => e.CargoId == id).ToListAsync();
+        foreach(var e in empregados) e.CargoId = 9999;
+
         _context.Cargos.Remove(cargo);
-        await _context.SaveChangesAsync();
+        
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Não é possível excluir este cargo pois ele está vinculado a um ou mais empregados." });
+        }
 
         return NoContent();
     }

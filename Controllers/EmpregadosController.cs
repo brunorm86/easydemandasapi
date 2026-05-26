@@ -109,7 +109,14 @@ public class EmpregadosController : ControllerBase
             existente.SenhaHash = empregado.SenhaHash.Length == 64 ? empregado.SenhaHash : HashPassword(empregado.SenhaHash);
         }
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Erro de integridade de dados ao atualizar empregado. Verifique referências." });
+        }
 
         return NoContent();
     }
@@ -118,6 +125,8 @@ public class EmpregadosController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEmpregado(int id)
     {
+        if (id == 9999) return BadRequest(new { mensagem = "Não é possível excluir o empregado padrão do sistema." });
+
         var empregado = await _context.Empregados.FindAsync(id);
 
         if (empregado == null)
@@ -125,8 +134,21 @@ public class EmpregadosController : ControllerBase
             return NotFound(new { mensagem = $"Empregado com ID {id} não encontrado." });
         }
 
+        var departamentos = await _context.Departamentos.Where(d => d.ResponsavelId == id).ToListAsync();
+        foreach(var d in departamentos) d.ResponsavelId = 9999;
+
+        var chamados = await _context.Chamados.Where(c => c.SolicitanteId == id).ToListAsync();
+        foreach(var c in chamados) c.SolicitanteId = 9999;
+
         _context.Empregados.Remove(empregado);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Não é possível excluir o empregado pois ele está vinculado a outros registros." });
+        }
 
         return NoContent();
     }

@@ -78,7 +78,14 @@ public class DepartamentosController : ControllerBase
         departamentoExistente.Sigla = departamento.Sigla;
         departamentoExistente.ResponsavelId = departamento.ResponsavelId;
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Erro de integridade de dados ao atualizar departamento." });
+        }
 
         return NoContent();
     }
@@ -87,6 +94,8 @@ public class DepartamentosController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteDepartamento(int id)
     {
+        if (id == 9999) return BadRequest(new { mensagem = "Não é possível excluir o departamento padrão do sistema." });
+
         var departamento = await _context.Departamentos.FindAsync(id);
 
         if (departamento == null)
@@ -94,8 +103,21 @@ public class DepartamentosController : ControllerBase
             return NotFound(new { mensagem = $"Departamento com ID {id} não encontrado." });
         }
 
+        var empregados = await _context.Empregados.Where(e => e.DepartamentoId == id).ToListAsync();
+        foreach(var e in empregados) e.DepartamentoId = 9999;
+
+        var detalhes = await _context.DetalhesChamados.Where(dc => dc.DepartamentoId == id).ToListAsync();
+        foreach(var dc in detalhes) dc.DepartamentoId = 9999;
+
         _context.Departamentos.Remove(departamento);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Não é possível excluir o departamento pois ele está vinculado a outros registros." });
+        }
 
         return NoContent();
     }

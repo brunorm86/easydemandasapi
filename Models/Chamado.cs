@@ -14,7 +14,7 @@ public class Chamado
 
     public required string Descricao { get; set; }
 
-    public required string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
     public DateTime DataAbertura { get; set; } = DateTime.UtcNow;
 

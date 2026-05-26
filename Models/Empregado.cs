@@ -28,6 +28,6 @@ public class Empregado
     public Departamento? Departamento { get; set; }
 
     // --- Dados de Autenticação e Autorização ---
-    public required string SenhaHash { get; set; }
-    public required string Perfil { get; set; }
+    public string SenhaHash { get; set; } = string.Empty;
+    public string Perfil { get; set; } = string.Empty;
 }

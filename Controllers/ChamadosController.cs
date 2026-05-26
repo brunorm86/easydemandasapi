@@ -85,6 +85,10 @@ public class ChamadosController : ControllerBase
                 throw;
             }
         }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Erro de integridade ao atualizar chamado." });
+        }
 
         return NoContent();
     }
@@ -100,7 +104,14 @@ public class ChamadosController : ControllerBase
         }
 
         _context.Chamados.Remove(chamado);
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { mensagem = "Não é possível excluir o chamado pois ele está vinculado a outros registros." });
+        }
 
         return NoContent();
     }
