@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
 using easydemandasapi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace easydemandasapi.Controllers;
 
+[Authorize(Roles = "RH,Gestor")]
 [ApiController]
 [Route("api/[controller]")]
 public class CargosController : ControllerBase
@@ -35,6 +37,7 @@ public class CargosController : ControllerBase
         return cargo;
     }
 
+    [Authorize(Roles = "Gestor")]
     [HttpPost]
     public async Task<ActionResult<Cargo>> PostCargo(Cargo cargo)
     {
@@ -44,6 +47,7 @@ public class CargosController : ControllerBase
         return CreatedAtAction(nameof(GetCargo), new { id = cargo.Id }, cargo);
     }
 
+    [Authorize(Roles = "Gestor")]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutCargo(int id, Cargo cargo)
     {
@@ -73,6 +77,7 @@ public class CargosController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Gestor")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCargo(int id)
     {

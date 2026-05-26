@@ -3,6 +3,9 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // =====================================================================
 // BUILDER — fase de configuração
@@ -31,7 +34,56 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // AddEndpointsApiExplorer() descobre os endpoints disponíveis.
 // AddSwaggerGen() gera a documentação interativa da API.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "EasyDemandas API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// Configura JWT Authentication
+var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? "super_secret_easydemandas_token_key_123456!");
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = true;
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "easydemandasapi",
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "easydemandasfront",
+        ValidateLifetime = true
+    };
+});
+builder.Services.AddAuthorization();
 
 // Configura CORS (Cross-Origin Resource Sharing).
 // Isso permite que o frontend React (que roda em outra porta)
@@ -64,6 +116,10 @@ if (app.Environment.IsDevelopment())
 // Ativa o CORS com a política que definimos acima.
 // IMPORTANTE: deve vir ANTES do MapControllers().
 app.UseCors("PermitirTudo");
+
+// Ativa Autenticação e Autorização no Pipeline
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Ativa o roteamento de requisições para os Controllers.
 // É aqui que o .NET olha para a URL da requisição e decide

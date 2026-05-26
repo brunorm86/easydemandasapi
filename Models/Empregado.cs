@@ -26,4 +26,8 @@ public class Empregado
 
     public int? DepartamentoId { get; set; }
     public Departamento? Departamento { get; set; }
+
+    // --- Dados de Autenticação e Autorização ---
+    public required string SenhaHash { get; set; }
+    public required string Perfil { get; set; }
 }

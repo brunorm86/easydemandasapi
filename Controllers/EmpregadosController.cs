@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
 using easydemandasapi.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace easydemandasapi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class EmpregadosController : ControllerBase
@@ -44,15 +48,31 @@ public class EmpregadosController : ControllerBase
         return Ok(empregado);
     }
 
+    [Authorize(Roles = "RH,Gestor")]
     [HttpPost]
     public async Task<ActionResult<Empregado>> PostEmpregado(Empregado empregado)
     {
+        if (string.IsNullOrEmpty(empregado.SenhaHash))
+        {
+            empregado.SenhaHash = "8d969eee76d92476d701125b16222e1785c874291147139c74c09044b1551139"; // 123456
+        }
+        else if (empregado.SenhaHash.Length != 64)
+        {
+            empregado.SenhaHash = HashPassword(empregado.SenhaHash);
+        }
+
+        if (string.IsNullOrEmpty(empregado.Perfil))
+        {
+            empregado.Perfil = "Usuario";
+        }
+
         _context.Empregados.Add(empregado);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetEmpregado), new { id = empregado.Id }, empregado);
     }
 
+    [Authorize(Roles = "RH,Gestor")]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutEmpregado(int id, Empregado empregado)
     {
@@ -78,12 +98,23 @@ public class EmpregadosController : ControllerBase
         existente.CargoId = empregado.CargoId;
         existente.DataContratacao = empregado.DataContratacao;
         existente.DepartamentoId = empregado.DepartamentoId;
+        
+        if (!string.IsNullOrEmpty(empregado.Perfil))
+        {
+            existente.Perfil = empregado.Perfil;
+        }
+
+        if (!string.IsNullOrEmpty(empregado.SenhaHash) && empregado.SenhaHash != existente.SenhaHash)
+        {
+            existente.SenhaHash = empregado.SenhaHash.Length == 64 ? empregado.SenhaHash : HashPassword(empregado.SenhaHash);
+        }
 
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
+    [Authorize(Roles = "RH,Gestor")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEmpregado(int id)
     {
@@ -98,5 +129,11 @@ public class EmpregadosController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private static string HashPassword(string password)
+    {
+        byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+        return Convert.ToHexString(bytes).ToLower();
     }
 }

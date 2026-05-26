@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
 using easydemandasapi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace easydemandasapi.Controllers;
 
+[Authorize(Roles = "RH,Suporte,Usuario,Gestor")]
 [ApiController]
 [Route("api/[controller]")]
 public class ChamadosController : ControllerBase
@@ -48,6 +50,7 @@ public class ChamadosController : ControllerBase
         return CreatedAtAction(nameof(GetChamado), new { id = chamado.Id }, chamado);
     }
 
+    [Authorize(Roles = "Suporte,Gestor")]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutChamado(int id, Chamado chamado)
     {
@@ -77,6 +80,7 @@ public class ChamadosController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Suporte,Gestor")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteChamado(int id)
     {

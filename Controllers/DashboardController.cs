@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace easydemandasapi.Controllers;
 
@@ -29,6 +30,7 @@ public class DashboardChamadosDto
     public List<LabelValueDto> TopGargalos { get; set; } = new();
 }
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class DashboardController : ControllerBase

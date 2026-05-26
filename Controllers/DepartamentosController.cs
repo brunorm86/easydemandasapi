@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
 using easydemandasapi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace easydemandasapi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class DepartamentosController : ControllerBase
@@ -41,6 +43,7 @@ public class DepartamentosController : ControllerBase
         return Ok(departamento);
     }
 
+    [Authorize(Roles = "Gestor")]
     [HttpPost]
     public async Task<ActionResult<Departamento>> PostDepartamento(Departamento departamento)
     {
@@ -55,6 +58,7 @@ public class DepartamentosController : ControllerBase
         return CreatedAtAction(nameof(GetDepartamento), new { id = departamento.Id }, departamento);
     }
 
+    [Authorize(Roles = "Gestor")]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutDepartamento(int id, Departamento departamento)
     {
@@ -79,6 +83,7 @@ public class DepartamentosController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Gestor")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteDepartamento(int id)
     {
