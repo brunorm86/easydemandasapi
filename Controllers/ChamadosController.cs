@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using easydemandasapi.Data;
 using easydemandasapi.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace easydemandasapi.Controllers;
 
@@ -44,6 +45,14 @@ public class ChamadosController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Chamado>> PostChamado(Chamado chamado)
     {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (int.TryParse(userIdClaim, out int userId))
+        {
+            chamado.SolicitanteId = userId;
+        }
+
+        chamado.Status = "Aberto";
+
         _context.Chamados.Add(chamado);
         await _context.SaveChangesAsync();
 
