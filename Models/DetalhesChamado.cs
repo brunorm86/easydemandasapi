@@ -17,7 +17,7 @@ public class DetalhesChamado
     public Chamado? Chamado { get; set; }
 
     // Centro de Custo (Chave Estrangeira para Departamento)
-    public int DepartamentoId { get; set; }
+    public int? DepartamentoId { get; set; }
     public Departamento? Departamento { get; set; }
 
     public decimal? Custo { get; set; }

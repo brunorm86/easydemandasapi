@@ -15,4 +15,7 @@ public class AuthResponseDto
     public required string Nome { get; set; }
     public required string Email { get; set; }
     public required string Perfil { get; set; }
+    public string? Cargo { get; set; }
+    public string? Departamento { get; set; }
+    public string? Cpf { get; set; }
 }

@@ -36,6 +36,8 @@ public class AuthController : ControllerBase
         var emailLower = loginDto.Email.ToLower().Trim();
 
         var empregado = await _context.Empregados
+            .Include(e => e.Cargo)
+            .Include(e => e.Departamento)
             .FirstOrDefaultAsync(e => e.Email.ToLower() == emailLower);
 
         if (empregado == null)
@@ -58,7 +60,10 @@ public class AuthController : ControllerBase
             UsuarioId = empregado.Id,
             Nome = $"{empregado.Nome} {empregado.Sobrenome}",
             Email = empregado.Email,
-            Perfil = empregado.Perfil
+            Perfil = empregado.Perfil,
+            Cargo = empregado.Cargo?.Nome,
+            Departamento = empregado.Departamento?.Nome,
+            Cpf = empregado.Cpf
         });
     }
 
