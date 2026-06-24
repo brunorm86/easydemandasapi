@@ -17,6 +17,7 @@ public class Empregado
     public required string Endereco { get; set; }
     public required string Cpf { get; set; }
     public required DateOnly DataNascimento { get; set; }
+    public string? FotoCaminho { get; set; }
 
     // --- Dados de vínculo empregatício ---
     public int CargoId { get; set; }

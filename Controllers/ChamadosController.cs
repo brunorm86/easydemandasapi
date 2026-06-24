@@ -20,11 +20,31 @@ public class ChamadosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Chamado>>> GetChamados()
+    public async Task<ActionResult<IEnumerable<Chamado>>> GetChamados([FromQuery] bool todos = false)
     {
-        return await _context.Chamados
-            .Include(c => c.Detalhes)
-            .ToListAsync();
+        var query = _context.Chamados.Include(c => c.Detalhes).AsQueryable();
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        bool shouldFilter = true;
+
+        if (todos)
+        {
+            var roleClaim = User.FindFirstValue(ClaimTypes.Role);
+            if (roleClaim == "Suporte" || roleClaim == "Gestor")
+            {
+                shouldFilter = false;
+            }
+        }
+
+        if (shouldFilter)
+        {
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                query = query.Where(c => c.SolicitanteId == userId);
+            }
+        }
+
+        return await query.ToListAsync();
     }
 
     [HttpGet("{id}")]
@@ -37,6 +57,19 @@ public class ChamadosController : ControllerBase
         if (chamado == null)
         {
             return NotFound();
+        }
+
+        var roleClaim = User.FindFirstValue(ClaimTypes.Role);
+        if (roleClaim != "Suporte" && roleClaim != "Gestor")
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                if (chamado.SolicitanteId != userId)
+                {
+                    return Forbid();
+                }
+            }
         }
 
         return chamado;

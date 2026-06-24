@@ -158,4 +158,66 @@ public class EmpregadosController : ControllerBase
         byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
         return Convert.ToHexString(bytes).ToLower();
     }
+
+    [Authorize(Roles = "RH,Gestor")]
+    [HttpPost("{id}/foto")]
+    public async Task<IActionResult> UploadFoto(int id, IFormFile foto)
+    {
+        if (foto == null || foto.Length == 0) return BadRequest(new { mensagem = "Nenhum arquivo enviado." });
+
+        var extensoesPermitidas = new[] { ".jpg", ".jpeg", ".png" };
+        var extensao = Path.GetExtension(foto.FileName).ToLowerInvariant();
+        if (!extensoesPermitidas.Contains(extensao)) return BadRequest(new { mensagem = "Tipo de arquivo inválido. Apenas JPG, JPEG e PNG são permitidos." });
+        if (foto.Length > 5 * 1024 * 1024) return BadRequest(new { mensagem = "O tamanho máximo permitido para a foto é de 5MB." });
+
+        var empregado = await _context.Empregados.FindAsync(id);
+        if (empregado == null) return NotFound(new { mensagem = "Empregado não encontrado." });
+
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Fotos");
+        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+        var nomeArquivoUnico = Guid.NewGuid().ToString() + extensao;
+        var caminhoFisico = Path.Combine(uploadsFolder, nomeArquivoUnico);
+
+        using (var stream = new FileStream(caminhoFisico, FileMode.Create))
+        {
+            await foto.CopyToAsync(stream);
+        }
+
+        if (!string.IsNullOrEmpty(empregado.FotoCaminho))
+        {
+            var fotoAntiga = Path.Combine(uploadsFolder, empregado.FotoCaminho);
+            if (System.IO.File.Exists(fotoAntiga)) System.IO.File.Delete(fotoAntiga);
+        }
+
+        empregado.FotoCaminho = nomeArquivoUnico;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { mensagem = "Foto atualizada com sucesso", fotoCaminho = nomeArquivoUnico });
+    }
+
+    [Authorize]
+    [HttpGet("{id}/foto")]
+    public async Task<IActionResult> GetFoto(int id)
+    {
+        var empregado = await _context.Empregados.FindAsync(id);
+        if (empregado == null || string.IsNullOrEmpty(empregado.FotoCaminho))
+        {
+            return NotFound();
+        }
+
+        var caminhoFisico = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Fotos", empregado.FotoCaminho);
+        if (!System.IO.File.Exists(caminhoFisico))
+        {
+            return NotFound();
+        }
+
+        Response.Headers.Append("X-Content-Type-Options", "nosniff");
+        var contentType = "application/octet-stream";
+        var extensao = Path.GetExtension(caminhoFisico).ToLowerInvariant();
+        if (extensao == ".jpg" || extensao == ".jpeg") contentType = "image/jpeg";
+        else if (extensao == ".png") contentType = "image/png";
+
+        return PhysicalFile(caminhoFisico, contentType);
+    }
 }
