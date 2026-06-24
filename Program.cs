@@ -11,6 +11,9 @@ using System.Text;
 // BUILDER — fase de configuração
 // Aqui registramos todos os serviços que a aplicação vai usar.
 // =====================================================================
+// Enable legacy timestamp behavior to allow storing non-UTC dates (like UTC-3) in PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Registra os Controllers no sistema de Injeção de Dependência.
@@ -131,6 +134,17 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.Migrate();
+
+    // Fix initial seed departments for managers to avoid circular dependency on creation
+    var gestores = context.Empregados.Where(e => e.Id <= 7 && e.DepartamentoId == null).ToList();
+    if (gestores.Any())
+    {
+        foreach (var g in gestores)
+        {
+            g.DepartamentoId = g.Id; // Empregado 'i' é responsável pelo Departamento 'i'
+        }
+        context.SaveChanges();
+    }
 }
 
 // Inicia a aplicação e fica escutando requisições HTTP.

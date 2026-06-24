@@ -16,7 +16,9 @@ public class Chamado
 
     public string Status { get; set; } = string.Empty;
 
-    public DateTime DataAbertura { get; set; } = DateTime.UtcNow;
+    public DateTime DataAbertura { get; set; } = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(-3)).DateTime;
+
+    public bool Ativo { get; set; } = true;
 
     public DateTime? DataConclusao { get; set; }
 
