@@ -100,7 +100,7 @@ public class DashboardController : ControllerBase
             .GroupBy(c => c.Solicitante!.DepartamentoId)
             .Select(g =>
             {
-                var nome = g.First().Solicitante?.Departamento?.Nome ?? $"Dept. #{g.Key}";
+                var nome = g.First().Solicitante?.Departamento?.Nome ?? "S/ Departamento";
                 return new LabelValueDto { Label = nome, Value = g.Count() };
             })
             .OrderByDescending(x => x.Value)
@@ -113,7 +113,7 @@ public class DashboardController : ControllerBase
             .GroupBy(c => c.Detalhes!.DepartamentoId)
             .Select(g =>
             {
-                var nome = g.First().Detalhes?.Departamento?.Nome ?? $"Dept. #{g.Key}";
+                var nome = g.First().Detalhes?.Departamento?.Nome ?? "S/ Departamento";
                 return new LabelValueDto { Label = nome, Value = g.Count() };
             })
             .OrderByDescending(x => x.Value)
@@ -126,7 +126,7 @@ public class DashboardController : ControllerBase
             .GroupBy(c => c.Detalhes!.DepartamentoId)
             .Select(g =>
             {
-                var nome = g.First().Detalhes?.Departamento?.Nome ?? $"Dept. #{g.Key}";
+                var nome = g.First().Detalhes?.Departamento?.Nome ?? "S/ Departamento";
                 var total = g.Sum(c => c.Detalhes!.Custo!.Value);
                 return new LabelValueDto { Label = nome, Value = total };
             })
@@ -140,7 +140,7 @@ public class DashboardController : ControllerBase
             .GroupBy(c => c.Detalhes!.DepartamentoId)
             .Select(g =>
             {
-                var nome = g.First().Detalhes?.Departamento?.Nome ?? $"Dept. #{g.Key}";
+                var nome = g.First().Detalhes?.Departamento?.Nome ?? "S/ Departamento";
                 return new LabelValueDto { Label = nome, Value = g.Count() };
             })
             .OrderByDescending(x => x.Value)
